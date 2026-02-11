@@ -10,11 +10,12 @@ export class StringBuilderPro implements INodeType {
 	description: INodeTypeDescription = {
 		displayName: 'String Builder Pro',
 		name: 'stringBuilderPro',
-		icon: 'file:stringBuilder.svg',
+		icon: 'file:StringBuilderPro.svg',
 		group: ['transform'],
 		version: 1,
 		description: 'Acumula strings entre itens e execuções',
 		defaults: { name: 'String Builder' },
+		usableAsTool: true,
 		inputs: ['main'],
 		outputs: ['main'],
 		properties: [
@@ -58,7 +59,7 @@ async execute(this: IExecuteFunctions): Promise<INodeExecutionData[][]> {
 			let val = '';
 			try {
 				val = this.getNodeParameter('valueToAppend', i) as string;
-			} catch (error) {
+			} catch {
 				continue;
 			}
 
