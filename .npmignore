@@ -1,0 +1,7 @@
+# Não ignore a dist para o NPM
+!dist/
+
+# Mas ignore os fontes e configs de dev
+nodes/**/*.ts
+tsconfig.json
+gulpfile.js
