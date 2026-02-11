@@ -1,4 +1,3 @@
-// import { NodeExecuteFunctions } from 'n8n-core';
 import {
 	IExecuteFunctions,
 	INodeExecutionData,
@@ -10,52 +9,66 @@ export class StringBuilderPro implements INodeType {
 	description: INodeTypeDescription = {
 		displayName: 'String Builder Pro',
 		name: 'stringBuilderPro',
-		icon: 'file:StringBuilderPro.svg',
+		icon: 'file:StringBuilderPro.svg', 
 		group: ['transform'],
 		version: 1,
-		description: 'Acumula strings entre itens e execuções',
-		defaults: { name: 'String Builder' },
+		description: 'Acumula strings entre execuções ou loops de forma persistente.',
+		defaults: {
+			name: 'String Builder Pro',
+		},
 		usableAsTool: true,
 		inputs: ['main'],
 		outputs: ['main'],
 		properties: [
 			{
+				displayName: 'Operation',
+				name: 'operation',
+				type: 'options',
+				options: [
+					{ name: 'Append', value: 'append', description: 'Adiciona o valor ao buffer existente' },
+					{ name: 'Reset and Append', value: 'reset', description: 'Limpa o buffer antes de adicionar o novo valor' },
+				],
+				default: 'append',
+				noDataExpression: true,
+			},
+			{
 				displayName: 'Value to Append',
 				name: 'valueToAppend',
 				type: 'string',
 				default: '',
-				placeholder: 'Ex: {{ $json.nome }}',
-				required: true,
+				placeholder: 'Texto para adicionar...',
+				description: 'O valor que será concatenado ao acumulador',
 			},
 			{
 				displayName: 'Separator',
 				name: 'separator',
 				type: 'options',
 				options: [
-					{ name: 'New Line', value: '\\n' },
-					{ name: 'Comma', value: ', ' },
-					{ name: 'Space', value: ' ' },
 					{ name: 'None', value: '' },
+					{ name: 'New Line', value: '\\n' },
+					{ name: 'Comma', value: ',' },
+					{ name: 'Space', value: ' ' },
 				],
 				default: '\\n',
+				description: 'Caractere colocado entre os valores acumulados',
 			},
 		],
 	};
 
-async execute(this: IExecuteFunctions): Promise<INodeExecutionData[][]> {
+	async execute(this: IExecuteFunctions): Promise<INodeExecutionData[][]> {
 		const items = this.getInputData();
-		const staticData = this.getWorkflowStaticData('global');
+		const returnData: INodeExecutionData[] = [];
+		const staticData = this.getWorkflowStaticData('node');
 
-		if (staticData.sbContent === undefined || staticData.sbContent === null) {
-			staticData.sbContent = '';
+		// Lógica de Reset
+		const operation = this.getNodeParameter('operation', 0) as string;
+		if (operation === 'reset') {
+			staticData.accumulatedString = '';
 		}
 
-		const separator = this.getNodeParameter('separator', 0) as string;
-
-				let currentContent = staticData.sbContent as string;
+		let currentString = (staticData.accumulatedString as string) || '';
 
 		for (let i = 0; i < items.length; i++) {
-			
 			let val = '';
 			try {
 				val = this.getNodeParameter('valueToAppend', i) as string;
@@ -63,18 +76,18 @@ async execute(this: IExecuteFunctions): Promise<INodeExecutionData[][]> {
 				continue;
 			}
 
-			val = val || '';
+			const separator = this.getNodeParameter('separator', i) as string;
+			const realSeparator = separator === '\\n' ? '\n' : separator;
 
-			if (currentContent.length > 0 && val.length > 0) {
-				const finalSeparator = separator === '\\n' ? '\n' : separator;
-				currentContent += finalSeparator;
+			if (currentString.length > 0 && val.length > 0) {
+				currentString += realSeparator;
 			}
-
-			currentContent += val;
+			currentString += val;
 		}
 
-		staticData.sbContent = currentContent;
+		staticData.accumulatedString = currentString;
+		returnData.push({ json: { result: currentString } });
 
-		return [this.helpers.returnJsonArray({ result: staticData.sbContent })];
+		return [returnData];
 	}
 }
