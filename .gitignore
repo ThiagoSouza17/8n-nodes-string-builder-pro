@@ -1,0 +1,13 @@
+# Dependências
+node_modules/
+
+# Build
+dist/
+
+# Logs e Cache
+npm-debug.log*
+.eslintcache
+
+# Sistema
+.DS_Store
+Thumbs.db
