@@ -1,6 +1,6 @@
 {
     "name": "n8n-nodes-string-builder-pro",
-    "version": "0.1.6",
+    "version": "0.1.7",
     "description": "Nó avançado para acumulação de strings em loops e fluxos de dados.",
     "license": "MIT",
     "homepage": "https://github.com/ThiagoSouza17/8n-nodes-string-builder-pro",
